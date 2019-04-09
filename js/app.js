@@ -13,11 +13,11 @@ let print_json = function(o) {
             p += k + ':' + o.data[k] + ', ';
         }
     }
-    p = p.replace(/, $/, ' },');
 
-    line.textContent = p;
+    line.textContent = p.replace(/, $/, ' },');
     debug.appendChild(line);
 
+    window.scrollTo(0,document.body.scrollHeight);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -34,11 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let uiDisconnected = function() {
         document.querySelector('#connect').disabled = false;
         document.querySelector('#disconnect').disabled = true;
-
-        let e = document.querySelector('#notifications');
-        while (e.firstChild) {
-            e.removeChild(e.firstChild);
-        }
     };
 
     let cbDisconnected = function() {
@@ -57,16 +52,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('debug').innerHTML = '';
     });
 
-    document.querySelector('#copy').addEventListener('copy', function() {
-        /* TODO */
-    });
-
     document.querySelector('#connect').addEventListener('click', function() {
         uiPending();
 
         m.connect()
         .then(() => {
-            return m.getMonitorInformation()
+            return m.getMonitorInformation();
         })
         .then(information => {
             return m.addEventListener('multiplexed-information', cbMultiplexed)
@@ -89,24 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
         m.removeEventListener('multiplexed-information', cbMultiplexed)
         .then(() => {
             return m.disconnect();
-        });
-    });
-
-    /*
-     * Toggle highlight on selected elements.
-     */
-    document.querySelectorAll('#notifications > div').forEach(function(el, i) {
-        el.addEventListener('click', function(e) {
-            toggleClass(this, 'highlight');
-        });
-    });
-
-    /*
-     * Show / hide description blocks.
-     */
-    document.querySelectorAll('.notes').forEach(function(el, i) {
-        el.addEventListener('click', function(e) {
-            toggleClass(this, 'hidden');
         });
     });
 });
