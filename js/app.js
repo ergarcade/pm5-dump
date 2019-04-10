@@ -2,7 +2,7 @@
 
 let m = new Monitor();
 
-let print_json = function(o) {
+let printJson = function(o) {
     let debug = document.getElementById('debug');
     let line = document.createElement('p');
     let p = '';
@@ -20,10 +20,20 @@ let print_json = function(o) {
     window.scrollTo(0,document.body.scrollHeight);
 };
 
+let clearDebug = function() {
+    document.getElementById('debug').innerHTML = '';
+}
+
+let toggleInstructions = function() {
+    toggleClass(document.getElementById('instructions'), 'hidden');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     let uiConnected = function() {
         document.querySelector('#connect').disabled = true;
         document.querySelector('#disconnect').disabled = false;
+
+        clearDebug();
     };
 
     let uiPending = function() {
@@ -45,11 +55,15 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     let cbMultiplexed = function(e) {
-        print_json(e);
+        printJson(e);
     };
 
     document.querySelector('#clear').addEventListener('click', function() {
-        document.getElementById('debug').innerHTML = '';
+        clearDebug();
+    });
+
+    document.querySelector('#toggle_instructions').addEventListener('click', function() {
+        toggleInstructions();
     });
 
     document.querySelector('#connect').addEventListener('click', function() {
