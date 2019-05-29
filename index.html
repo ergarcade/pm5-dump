@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <script src="js/eventtarget.js"></script>
+        <script src="js/monitor.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/ymnnjq.js"></script>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <style>
+        #debug {
+            font-size: smaller;
+        }
+        #debug p {
+            margin: 0;
+        }
+        .right {
+            float: right;
+        }
+        .hidden {
+            display: none;
+        }
+        </style>
+    </head>
+
+    <body>
+        <div id="configuration">
+            <button id="connect">Connect</button>
+            <button id="disconnect" disabled="disabled">Disconnect</button>
+            <div class="right">
+                <button id="toggle_instructions">Toggle instructions</button>
+                <button id="clear">Clear dump</button>
+            </div>
+        </div>
+
+        <hr />
+
+        <div id="instructions">
+            <h1>pm5-dump</h1>
+            <p>
+                Collect all information provided by a <a
+                    href="https://www.concept2.com">Concept2</a> Performance
+                Monitor model 5 (PM5) over the Bluetooth interface and dump as
+                json below.
+            </p>
+
+            <h2>Requirements</h2>
+            <ul>
+                <li>A <a href="https://www.concept2.com">Concept2</a> ergometer - indoor rower,
+                    SkiErg or BikeErg;</li>
+                <li>A <a href="https://www.concept2.com/indoor-rowers/performance-monitors">PM5</a>
+                    performance monitor;</li>
+                <li>Computer with Bluetooth enabled;</li>
+                <li>Lastest version of <a href="https://google.com/chrome">Chrome</a></li>
+            </ul>
+
+            <h2>Usage</h2>
+            <ul>
+                <li>Enable Bluetooth on computer.</li>
+                <li>Click the <strong>Connect</strong> button, above.</li>
+                <li>Pair the PM5 with Chrome, as requested.</li>
+                <li>Wait until the connection is setup; information will start
+                    appearing shortly.</li>
+                <li>Click the <strong>Disconnect</strong> button when done.</li>
+            </ul>
+
+            <hr />
+        </div>
+
+
+        <div id="debug">
+        </div>
+    </body>
+</html>
