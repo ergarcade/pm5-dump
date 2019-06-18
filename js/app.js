@@ -17,7 +17,7 @@ let printJson = function(o) {
     line.textContent = p.replace(/, $/, ' },');
     debug.appendChild(line);
 
-    window.scrollTo(0,document.body.scrollHeight);
+    window.scrollTo(0, document.body.scrollHeight);
 };
 
 let clearDebug = function() {
@@ -32,29 +32,30 @@ document.addEventListener('DOMContentLoaded', function() {
     let uiConnected = function() {
         document.querySelector('#connect').disabled = true;
         document.querySelector('#disconnect').disabled = false;
-
-        clearDebug();
+        document.querySelector('#message-type').disabled = true;
     };
 
     let uiPending = function() {
         document.querySelector('#connect').disabled = true;
         document.querySelector('#disconnect').disabled = true;
+        document.querySelector('#message-type').disabled = true;
     };
 
     let uiDisconnected = function() {
         document.querySelector('#connect').disabled = false;
         document.querySelector('#disconnect').disabled = true;
+        document.querySelector('#message-type').disabled = false;
     };
 
     let cbDisconnected = function() {
         console.log('cbDisconnected');
-        this.removeEventListener('multiplexed-information', cbMultiplexed)
+        this.removeEventListener(document.querySelector('#message-type').value, cbMessage)
         this.removeEventListener('disconnect', cbDisconnected);
 
         uiDisconnected();
     };
 
-    let cbMultiplexed = function(e) {
+    let cbMessage = function(e) {
         printJson(e);
     };
 
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return m.getMonitorInformation();
         })
         .then(information => {
-            return m.addEventListener('multiplexed-information', cbMultiplexed)
+            return m.addEventListener(document.querySelector('#message-type').value, cbMessage)
             .then(() => {
                 uiConnected();
                 return m.addEventListener('disconnect', cbDisconnected);
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.querySelector('#disconnect').addEventListener('click', function() {
-        m.removeEventListener('multiplexed-information', cbMultiplexed)
+        m.removeEventListener(document.querySelector('#message-type').value, cbMessage)
         .then(() => {
             return m.disconnect();
         });
