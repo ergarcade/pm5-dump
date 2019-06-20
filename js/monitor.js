@@ -578,6 +578,10 @@ class Monitor {
             case 'force-curve-data':
                 return this._addForceCurveData();
                 break;
+
+            default:
+                console.log('addEventListener: invalid event ' + type);
+                break;
         }
     }
 
@@ -625,6 +629,10 @@ class Monitor {
             case 'force-curve-data':
                 return this._removeForceCurveData();
                 break;
+
+            default:
+                console.log('removeEventListener: invalid event ' + type);
+                break;
         }
     }
 
@@ -666,9 +674,9 @@ class Monitor {
      */
     disconnect() {
         if (!this.connected()) {
+            console.log("disconnect: wasn't connected");
             return Promise.resolve();
         }
-        /* try: removeEventListener here, before we ask to disconnect */
         return this.device.gatt.disconnect();
     }
 

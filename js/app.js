@@ -72,18 +72,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         m.connect()
         .then(() => {
-            return m.getMonitorInformation();
-        })
-        .then(information => {
-            return m.addEventListener(document.querySelector('#message-type').value, cbMessage)
-            .then(() => {
-                uiConnected();
-                return m.addEventListener('disconnect', cbDisconnected);
-            })
-            .catch(error => {
-                uiDisconnected();
-                console.log(error);
-            });
+            m.addEventListener(document.querySelector('#message-type').value, cbMessage);
+            uiConnected();
         })
         .catch(error => {
             uiDisconnected();
@@ -92,9 +82,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.querySelector('#disconnect').addEventListener('click', function() {
+        uiPending();
+
         m.removeEventListener(document.querySelector('#message-type').value, cbMessage)
         .then(() => {
+            uiDisconnected();
             return m.disconnect();
+        })
+        .catch(error => {
+            console.log(error);
         });
     });
 });
