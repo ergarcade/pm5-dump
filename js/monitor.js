@@ -699,7 +699,10 @@ class Monitor {
             .then(s => {
                 this.idObjectMap.set(service.id, s);
                 return Promise.resolve(s);
-            });
+            })
+            .catch(error => {
+                console.log(error);
+            });;
     }
 
     /*
@@ -1143,6 +1146,9 @@ class Monitor {
             .then(c => {
                 this.idObjectMap.set(characteristic.id, c);
                 return Promise.resolve(c);
+            })
+            .catch(error => {
+                console.log(error);
             });
     }
 
@@ -1159,6 +1165,9 @@ class Monitor {
                     callback(monitor, e);
                 });
                 return Promise.resolve();
+            })
+            .catch(error => {
+                console.log(error);
             });
     }
 
