@@ -31,19 +31,18 @@ let toggleInstructions = function() {
 document.addEventListener('DOMContentLoaded', function() {
     let uiConnected = function() {
         document.querySelector('#connect').disabled = true;
-        document.querySelector('#disconnect').disabled = false;
+        document.querySelector('#connect').textContent = 'Disconnect';
         document.querySelector('#message-type').disabled = true;
     };
 
     let uiPending = function() {
         document.querySelector('#connect').disabled = true;
-        document.querySelector('#disconnect').disabled = true;
         document.querySelector('#message-type').disabled = true;
     };
 
     let uiDisconnected = function() {
         document.querySelector('#connect').disabled = false;
-        document.querySelector('#disconnect').disabled = true;
+        document.querySelector('#connect').textContent = 'Connect';
         document.querySelector('#message-type').disabled = false;
     };
 
@@ -70,27 +69,25 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#connect').addEventListener('click', function() {
         uiPending();
 
-        m.connect()
-        .then(() => {
-            m.addEventListener(document.querySelector('#message-type').value, cbMessage);
-            uiConnected();
-        })
-        .catch(error => {
-            uiDisconnected();
-            console.log(error);
-        });
-    });
-
-    document.querySelector('#disconnect').addEventListener('click', function() {
-        uiPending();
-
-        m.removeEventListener(document.querySelector('#message-type').value, cbMessage)
-        .then(() => {
-            uiDisconnected();
-            return m.disconnect();
-        })
-        .catch(error => {
-            console.log(error);
-        });
+        if (m.connected()) {
+            m.removeEventListener(document.querySelector('#message-type').value, cbMessage)
+            .then(() => {
+                uiDisconnected();
+                return m.disconnect();
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        } else {
+            m.connect()
+            .then(() => {
+                m.addEventListener(document.querySelector('#message-type').value, cbMessage);
+                uiConnected();
+            })
+            .catch(error => {
+                uiDisconnected();
+                console.log(error);
+            });
+        }
     });
 });
