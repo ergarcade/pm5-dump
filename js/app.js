@@ -22,32 +22,48 @@ let printJson = function(o) {
 
 let clearDebug = function() {
     document.getElementById('debug').innerHTML = '';
-}
+};
 
 let toggleInstructions = function() {
     toggleClass(document.getElementById('instructions'), 'hidden');
-}
+};
+
+let toggleMessages = function() {
+    toggleClass(document.getElementById('messages'), 'hidden');
+};
+
+let clearMessageTypes = function() {
+    let cbs = document.querySelectorAll('input[type=checkbox]');
+    for (let i = 0; i < cbs.length; i++) {
+        cbs[i].checked = false;
+    }
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     let uiConnected = function() {
         document.querySelector('#connect').disabled = true;
+        document.querySelector('#toggle_messages').disabled = false;
+        document.querySelector('#clear_messages').disabled = false;
         document.querySelector('#connect').textContent = 'Disconnect';
-        document.querySelector('#message-type').disabled = true;
     };
 
     let uiPending = function() {
         document.querySelector('#connect').disabled = true;
-        document.querySelector('#message-type').disabled = true;
+        document.querySelector('#toggle_messages').disabled = true;
     };
 
     let uiDisconnected = function() {
         document.querySelector('#connect').disabled = false;
         document.querySelector('#connect').textContent = 'Connect';
-        document.querySelector('#message-type').disabled = false;
+
+        document.querySelector('#toggle_messages').disabled = true;
+        document.querySelector('#clear_messages').disabled = true;
+        addClass(document.getElementById('messages'), 'hidden');
     };
 
     let cbDisconnected = function() {
         console.log('cbDisconnected');
+        /* XXX remove all listeners */
         this.removeEventListener(document.querySelector('#message-type').value, cbMessage)
         this.removeEventListener('disconnect', cbDisconnected);
 
@@ -66,22 +82,35 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleInstructions();
     });
 
+    document.querySelector('#toggle_messages').addEventListener('click', function() {
+        toggleMessages();
+    });
+
+    document.querySelector('#clear_messages').addEventListener('click', function() {
+        clearMessageTypes();
+    });
+
+    let boxes = document.querySelectorAll('input[type=checkbox]')
+    boxes.forEach((element) => {
+        element.addEventListener('change', (e) => {
+            console.log(element.value + ' is checked? ' + element.checked);
+
+            m.addEventListener(element.value, cbMessage);
+        });
+    });
+
     document.querySelector('#connect').addEventListener('click', function() {
         uiPending();
 
         if (m.connected()) {
-            m.removeEventListener(document.querySelector('#message-type').value, cbMessage)
-            .then(() => {
-                uiDisconnected();
-                return m.disconnect();
-            })
-            .catch(error => {
-                console.log(error);
-            });
+            cbDisconnected();
+            uiDisconnected();
+            m.disconnect();
         } else {
             m.connect()
             .then(() => {
-                m.addEventListener(document.querySelector('#message-type').value, cbMessage);
+                /* XXX add all selected message types */
+                //m.addEventListener(document.querySelector('#message-type').value, cbMessage);
                 uiConnected();
             })
             .catch(error => {
@@ -90,4 +119,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    uiDisconnected();
 });

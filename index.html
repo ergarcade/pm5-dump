@@ -34,7 +34,7 @@
             background: #aaa;
         }
         button#connect {
-            margin-left: 1em;
+            /*margin-left: 1em;*/
         }
         button#clear {
             margin-right: 1em;
@@ -55,21 +55,35 @@
     <body>
         <div id="configuration">
             <button id="connect">Connect</button>
-            <select id="message-type">
-                <option value="multiplexed-information">multiplexed-information</option>
-                <option value="general-status">general-status</option>
-                <option value="additional-status">additional-status</option>
-                <option value="additional-status2">additional-status2</option>
-                <option value="additional-stroke-data">additional-stroke-data</option>
-                <option value="additional-split-interval-data">additional-split-interval-data</option>
-                <option value="force-curve-data">force-curve-data</option>
-                <option value="split-interval-data">split-interval-data</option>
-                <option value="stroke-data">stroke-data</option>
-                <option value="workout-end">workout-end</option>
-            </select>
+            <button id="toggle_messages">Toggle message types</button>
+            <button id="clear_messages">Clear message types</button>
+
             <div class="right">
                 <button id="toggle_instructions">Toggle instructions</button>
                 <button id="clear">Clear dump</button>
+            </div>
+
+            <div id="messages" class="hidden">
+                <input type="checkbox" value="multiplexed-information">&nbsp;multiplexed-information
+                <br />
+
+                <input type="checkbox" value="general-status">&nbsp;general-status
+                <input type="checkbox" value="additional-status">&nbsp;additional-status
+                <input type="checkbox" value="additional-status2">&nbsp;additional-status2
+                <br />
+
+                <input type="checkbox" value="stroke-data">&nbsp;stroke-data
+                <input type="checkbox" value="additional-stroke-data">&nbsp;additional-stroke-data
+                <br />
+
+                <input type="checkbox" value="split-interval-data">&nbsp;split-interval-data
+                <input type="checkbox" value="additional-split-interval-data">&nbsp;additional-split-interval-data
+                <br />
+
+                <input type="checkbox" value="force-curve-data">&nbsp;force-curve-data
+                <br />
+
+                <input type="checkbox" value="workout-end">&nbsp;workout-end
             </div>
         </div>
 
@@ -98,11 +112,11 @@
                 <h2>Usage</h2>
                 <ul>
                     <li>Enable Bluetooth on computer.</li>
-                    <li>Choose message type to capture.</li>
                     <li>Click the <strong>Connect</strong> button.</li>
                     <li>Pair the PM5 with Chrome, as requested.</li>
                     <li>Wait until the connection is setup; information will start
                         appearing shortly.</li>
+                    <li>Choose message type(s) to capture.</li>
                     <li>Click the <strong>Disconnect</strong> button when done.</li>
                 </ul>
 

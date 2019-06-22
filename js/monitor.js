@@ -677,7 +677,7 @@ class Monitor {
     disconnect() {
         if (!this.connected()) {
             console.log("disconnect: wasn't connected");
-            return Promise.resolve();
+            return;
         }
         return this.device.gatt.disconnect();
     }
