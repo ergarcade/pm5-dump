@@ -657,8 +657,10 @@ class Monitor {
         })
         .then(device => {
             this.device = device;
-            this.device.addEventListener('gattserverdisconnected', () => {
+            this.device.addEventListener('gattserverdisconnected', _gattDisconnect => {
                 console.log('gattserverdisconnected');
+                this.device.removeEventListener('gattserverdisconnected', _gattDisconnect);
+                this.device = null; /* ? */
                 this.idObjectMap.clear();
                 this.eventTarget.dispatchEvent({ type: 'disconnect'});
             });
@@ -701,8 +703,9 @@ class Monitor {
                 return Promise.resolve(s);
             })
             .catch(error => {
-                console.log(error);
-            });;
+                console.log('getPrimaryService(' + service.id + ')');
+                return Promise.reject(error);
+            });
     }
 
     /*
@@ -1148,7 +1151,8 @@ class Monitor {
                 return Promise.resolve(c);
             })
             .catch(error => {
-                console.log(error);
+                console.log('getCharacteristic(' + characteristic.id + ')');
+                return Promise.reject(error);
             });
     }
 
