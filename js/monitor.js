@@ -576,11 +576,22 @@ class Monitor {
                 break;
 
             case 'force-curve-data':
-                return this._addForceCurveData();
+                /*
+                 * XXX We get this back:
+                 *
+                 *   NotFoundError: No Characteristics matching UUID
+                 *   ce06003d-43e5-11e4-916c-0800200c9a66 found in
+                 *   Service with UUID ce060030-43e5-11e4-916c-0800200c9a66.
+                 *
+                 * It _looks_ like this characteristic doesn't appear
+                 * in this service as per the spec. Have to get in touch
+                 * with Concept2 to see if this is the case, and what
+                 * service we need to associate this characteristic with.
+                 */
+                // return this._addForceCurveData();
                 break;
 
             default:
-                console.log('addEventListener: invalid event ' + type);
                 break;
         }
     }
@@ -631,7 +642,6 @@ class Monitor {
                 break;
 
             default:
-                console.log('removeEventListener: invalid event ' + type);
                 break;
         }
     }
@@ -1306,13 +1316,13 @@ class Monitor {
 
     _addAdditionalStatus2() {
         return this._setupCharacteristicValueListener(
-                characteristics.rowingService.additionalStatus, this._cbAdditionalStatus2
+                characteristics.rowingService.additionalStatus2, this._cbAdditionalStatus2
         );
     }
 
     _removeAdditionalStatus2() {
         return this._teardownCharacteristicValueListener(
-                characteristics.rowingService.additionalStatus, this._cbAdditionalStatus2
+                characteristics.rowingService.additionalStatus2, this._cbAdditionalStatus2
         );
     }
 

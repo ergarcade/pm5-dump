@@ -29,6 +29,7 @@
             top: 0;
             left: 0;
             width: 100%;
+            padding-left: 8px;
             padding-top: 0.5em;
             padding-bottom: 0.5em;
             background: #aaa;
@@ -56,7 +57,6 @@
         <div id="configuration">
             <button id="connect">Connect</button>
             <button id="toggle_messages">Toggle message types</button>
-            <button id="clear_messages">Clear message types</button>
 
             <div class="right">
                 <button id="toggle_instructions">Toggle instructions</button>
@@ -80,8 +80,8 @@
                 <input type="checkbox" value="additional-split-interval-data">&nbsp;additional-split-interval-data
                 <br />
 
-                <input type="checkbox" value="force-curve-data">&nbsp;force-curve-data
-                <br />
+                <!-- XXX characteristic not listed in services? -->
+                <!-- <input type="checkbox" value="force-curve-data">&nbsp;force-curve-data -->
 
                 <input type="checkbox" value="workout-end">&nbsp;workout-end
             </div>

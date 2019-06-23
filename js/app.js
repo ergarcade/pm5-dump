@@ -33,10 +33,10 @@ let toggleMessages = function() {
 };
 
 let clearMessageTypes = function() {
-    let cbs = document.querySelectorAll('input[type=checkbox]');
-    for (let i = 0; i < cbs.length; i++) {
-        cbs[i].checked = false;
-    }
+    let boxes = document.querySelectorAll('input[type=checkbox]:checked');
+    boxes.forEach((b) => {
+        b.checked = false;
+    });
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#connect').textContent = 'Disconnect';
 
         document.querySelector('#toggle_messages').disabled = false;
-        document.querySelector('#clear_messages').disabled = false;
     };
 
     let uiPending = function() {
@@ -58,13 +57,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#connect').disabled = false;
         document.querySelector('#connect').textContent = 'Connect';
 
+        clearMessageTypes();
+
         document.querySelector('#toggle_messages').disabled = true;
-        document.querySelector('#clear_messages').disabled = true;
         addClass(document.getElementById('messages'), 'hidden');
     };
 
     let cbDisconnected = function() {
-        //this.removeEventListener('disconnect', cbDisconnected);
+        m.removeEventListener('disconnect', cbDisconnected);
         uiDisconnected();
     };
 
@@ -82,10 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelector('#toggle_messages').addEventListener('click', function() {
         toggleMessages();
-    });
-
-    document.querySelector('#clear_messages').addEventListener('click', function() {
-        clearMessageTypes();
     });
 
     /*
@@ -114,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             m.connect()
             .then(() => {
+                m.addEventListener('disconnect', cbDisconnected);
                 uiConnected();
             })
             .catch(error => {
