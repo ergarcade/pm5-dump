@@ -23,55 +23,108 @@
         .hidden {
             display: none;
         }
+
+        #configuration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding-left: 8px;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+            background: #aaa;
+        }
+        button#connect {
+            /*margin-left: 1em;*/
+        }
+        button#clear {
+            margin-right: 1em;
+        }
+        #content {
+            margin-top: 3em;
+        }
+        img {
+            float: left;
+            width: 64px;
+        }
+        #content h1 {
+            padding-top: 12px;
+        }
         </style>
     </head>
 
     <body>
         <div id="configuration">
             <button id="connect">Connect</button>
-            <button id="disconnect" disabled="disabled">Disconnect</button>
+            <button id="toggle_messages">Toggle message types</button>
+
             <div class="right">
                 <button id="toggle_instructions">Toggle instructions</button>
                 <button id="clear">Clear dump</button>
             </div>
-        </div>
 
-        <hr />
+            <div id="messages" class="hidden">
+                <input type="checkbox" value="multiplexed-information">&nbsp;multiplexed-information
+                <br />
 
-        <div id="instructions">
-            <h1>pm5-dump</h1>
-            <p>
-                Collect all information provided by a <a
-                    href="https://www.concept2.com">Concept2</a> Performance
-                Monitor model 5 (PM5) over the Bluetooth interface and dump as
-                json below.
-            </p>
+                <input type="checkbox" value="general-status">&nbsp;general-status
+                <input type="checkbox" value="additional-status">&nbsp;additional-status
+                <input type="checkbox" value="additional-status2">&nbsp;additional-status2
+                <br />
 
-            <h2>Requirements</h2>
-            <ul>
-                <li>A <a href="https://www.concept2.com">Concept2</a> ergometer - indoor rower,
-                    SkiErg or BikeErg;</li>
-                <li>A <a href="https://www.concept2.com/indoor-rowers/performance-monitors">PM5</a>
-                    performance monitor;</li>
-                <li>Computer with Bluetooth enabled;</li>
-                <li>Lastest version of <a href="https://google.com/chrome">Chrome</a></li>
-            </ul>
+                <input type="checkbox" value="stroke-data">&nbsp;stroke-data
+                <input type="checkbox" value="additional-stroke-data">&nbsp;additional-stroke-data
+                <br />
 
-            <h2>Usage</h2>
-            <ul>
-                <li>Enable Bluetooth on computer.</li>
-                <li>Click the <strong>Connect</strong> button, above.</li>
-                <li>Pair the PM5 with Chrome, as requested.</li>
-                <li>Wait until the connection is setup; information will start
-                    appearing shortly.</li>
-                <li>Click the <strong>Disconnect</strong> button when done.</li>
-            </ul>
+                <input type="checkbox" value="split-interval-data">&nbsp;split-interval-data
+                <input type="checkbox" value="additional-split-interval-data">&nbsp;additional-split-interval-data
+                <br />
 
-            <hr />
+                <!-- XXX characteristic not listed in services? -->
+                <!-- <input type="checkbox" value="force-curve-data">&nbsp;force-curve-data -->
+
+                <input type="checkbox" value="workout-end">&nbsp;workout-end
+            </div>
         </div>
 
 
-        <div id="debug">
-        </div>
+        <div id="content">
+            <div id="instructions" class="hidden">
+                <img src="ergarcade-64x64.png" alt="pm5-dump" />
+                <h1>pm5-dump</h1>
+                <p>
+                    Collect all information provided by a <a
+                        href="https://www.concept2.com">Concept2</a> Performance
+                    Monitor model 5 (PM5) over the Bluetooth interface and dump as
+                    json below.
+                </p>
+
+                <h2>Requirements</h2>
+                <ul>
+                    <li>A <a href="https://www.concept2.com">Concept2</a> ergometer - RowErg,
+                        SkiErg or BikeErg;</li>
+                    <li>A <a href="https://www.concept2.com/indoor-rowers/performance-monitors">PM5</a>
+                        performance monitor;</li>
+                    <li>Computer with Bluetooth enabled;</li>
+                    <li>Lastest version of <a href="https://google.com/chrome">Chrome</a></li>
+                </ul>
+
+                <h2>Usage</h2>
+                <ul>
+                    <li>Enable Bluetooth on computer.</li>
+                    <li>Click the <strong>Connect</strong> button.</li>
+                    <li>Pair the PM5 with Chrome, as requested.</li>
+                    <li>Choose message type(s) to capture.</li>
+                    <li>Wait until the connection is setup; information will start
+                        appearing shortly.</li>
+                    <li>Click the <strong>Disconnect</strong> button when done.</li>
+                </ul>
+
+                <hr />
+            </div>
+
+            <div id="debug">
+            </div>
+        </div><!-- content -->
     </body>
 </html>

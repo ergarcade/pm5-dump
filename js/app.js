@@ -17,44 +17,58 @@ let printJson = function(o) {
     line.textContent = p.replace(/, $/, ' },');
     debug.appendChild(line);
 
-    window.scrollTo(0,document.body.scrollHeight);
+    window.scrollTo(0, document.body.scrollHeight);
 };
 
 let clearDebug = function() {
     document.getElementById('debug').innerHTML = '';
-}
+};
 
 let toggleInstructions = function() {
     toggleClass(document.getElementById('instructions'), 'hidden');
-}
+};
+
+let toggleMessages = function() {
+    toggleClass(document.getElementById('messages'), 'hidden');
+};
+
+let clearMessageTypes = function() {
+    let boxes = document.querySelectorAll('input[type=checkbox]:checked');
+    boxes.forEach((b) => {
+        b.checked = false;
+    });
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     let uiConnected = function() {
-        document.querySelector('#connect').disabled = true;
-        document.querySelector('#disconnect').disabled = false;
+        document.querySelector('#connect').disabled = false;
+        document.querySelector('#connect').textContent = 'Disconnect';
 
-        clearDebug();
+        document.querySelector('#toggle_messages').disabled = false;
     };
 
     let uiPending = function() {
         document.querySelector('#connect').disabled = true;
-        document.querySelector('#disconnect').disabled = true;
+
+        document.querySelector('#toggle_messages').disabled = true;
     };
 
     let uiDisconnected = function() {
         document.querySelector('#connect').disabled = false;
-        document.querySelector('#disconnect').disabled = true;
+        document.querySelector('#connect').textContent = 'Connect';
+
+        clearMessageTypes();
+
+        document.querySelector('#toggle_messages').disabled = true;
+        addClass(document.getElementById('messages'), 'hidden');
     };
 
     let cbDisconnected = function() {
-        console.log('cbDisconnected');
-        this.removeEventListener('multiplexed-information', cbMultiplexed)
-        this.removeEventListener('disconnect', cbDisconnected);
-
+        m.removeEventListener('disconnect', cbDisconnected);
         uiDisconnected();
     };
 
-    let cbMultiplexed = function(e) {
+    let cbMessage = function(e) {
         printJson(e);
     };
 
@@ -66,34 +80,45 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleInstructions();
     });
 
+    document.querySelector('#toggle_messages').addEventListener('click', function() {
+        toggleMessages();
+    });
+
+    /*
+     * Setup message type change.
+     */
+    let boxes = document.querySelectorAll('input[type=checkbox]');
+    boxes.forEach((element) => {
+        element.addEventListener('change', (e) => {
+            if (element.checked) {
+                m.addEventListener(element.value, cbMessage);
+                console.log('notification added for ' + element.value);
+            } else {
+                m.removeEventListener(element.value, cbMessage);
+                console.log('notification removed for ' + element.value);
+            }
+        });
+    });
+
     document.querySelector('#connect').addEventListener('click', function() {
         uiPending();
 
-        m.connect()
-        .then(() => {
-            return m.getMonitorInformation();
-        })
-        .then(information => {
-            return m.addEventListener('multiplexed-information', cbMultiplexed)
+        if (m.connected()) {
+            cbDisconnected();
+            uiDisconnected();
+            m.disconnect();
+        } else {
+            m.connect()
             .then(() => {
+                m.addEventListener('disconnect', cbDisconnected);
                 uiConnected();
-                return m.addEventListener('disconnect', cbDisconnected);
             })
             .catch(error => {
                 uiDisconnected();
                 console.log(error);
             });
-        })
-        .catch(error => {
-            uiDisconnected();
-            console.log(error);
-        });
+        }
     });
 
-    document.querySelector('#disconnect').addEventListener('click', function() {
-        m.removeEventListener('multiplexed-information', cbMultiplexed)
-        .then(() => {
-            return m.disconnect();
-        });
-    });
+    uiDisconnected();
 });

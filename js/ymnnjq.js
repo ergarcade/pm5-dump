@@ -15,4 +15,11 @@ let toggleClass = function (el, className) {
 
       el.className = classes.join(' ');
     }
-}
+};
+
+let addClass = function(el, className) {
+    if (el.classList)
+        el.classList.add(className);
+    else
+        el.className += ' ' + className;
+};
