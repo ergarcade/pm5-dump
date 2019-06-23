@@ -41,14 +41,16 @@ let clearMessageTypes = function() {
 
 document.addEventListener('DOMContentLoaded', function() {
     let uiConnected = function() {
-        document.querySelector('#connect').disabled = true;
+        document.querySelector('#connect').disabled = false;
+        document.querySelector('#connect').textContent = 'Disconnect';
+
         document.querySelector('#toggle_messages').disabled = false;
         document.querySelector('#clear_messages').disabled = false;
-        document.querySelector('#connect').textContent = 'Disconnect';
     };
 
     let uiPending = function() {
         document.querySelector('#connect').disabled = true;
+
         document.querySelector('#toggle_messages').disabled = true;
     };
 
@@ -62,11 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     let cbDisconnected = function() {
-        console.log('cbDisconnected');
-        /* XXX remove all listeners */
-        this.removeEventListener(document.querySelector('#message-type').value, cbMessage)
-        this.removeEventListener('disconnect', cbDisconnected);
-
+        //this.removeEventListener('disconnect', cbDisconnected);
         uiDisconnected();
     };
 
@@ -90,12 +88,19 @@ document.addEventListener('DOMContentLoaded', function() {
         clearMessageTypes();
     });
 
-    let boxes = document.querySelectorAll('input[type=checkbox]')
+    /*
+     * Setup message type change.
+     */
+    let boxes = document.querySelectorAll('input[type=checkbox]');
     boxes.forEach((element) => {
         element.addEventListener('change', (e) => {
-            console.log(element.value + ' is checked? ' + element.checked);
-
-            m.addEventListener(element.value, cbMessage);
+            if (element.checked) {
+                m.addEventListener(element.value, cbMessage);
+                console.log('notification added for ' + element.value);
+            } else {
+                m.removeEventListener(element.value, cbMessage);
+                console.log('notification removed for ' + element.value);
+            }
         });
     });
 
@@ -109,8 +114,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             m.connect()
             .then(() => {
-                /* XXX add all selected message types */
-                //m.addEventListener(document.querySelector('#message-type').value, cbMessage);
                 uiConnected();
             })
             .catch(error => {

@@ -98,7 +98,7 @@ const characteristics = {
             service:    services.rowing
         },
         additionalEndOfWorkoutSummaryData2: {
-            id:         'ce06003c-43e5-11e4-916c-0800200c9a66',
+            id:         'ce06003c-43e5-11e4-916c-0800200c9a66', /* multiplexed only */
             service:    services.rowing
         },
         forceCurveData: {
@@ -660,7 +660,6 @@ class Monitor {
             this.device.addEventListener('gattserverdisconnected', _gattDisconnect => {
                 console.log('gattserverdisconnected');
                 this.device.removeEventListener('gattserverdisconnected', _gattDisconnect);
-                this.device = null; /* ? */
                 this.idObjectMap.clear();
                 this.eventTarget.dispatchEvent({ type: 'disconnect'});
             });
@@ -715,9 +714,10 @@ class Monitor {
         const v = new Uint8Array(e.target.value.buffer);
         const numCharacteristics = (v[0] & 0xf0) >> 4;
         const numDataPoints = v[0] & 0x0f;
+        const sequenceNumber = v[1];
         let data = [];
 
-        for (let i = 0; i < numDataPoints; i++) {
+        for (let i = 2; i <= numDataPoints*2; i += 2) {
             data.push(v[i] + (v[i+1] << 8));
         }
 
@@ -728,6 +728,7 @@ class Monitor {
             data: {
                 numCharacteristics: numCharacteristics,
                 numDataPoints: numDataPoints,
+                sequeneNumber: sequenceNumber,
                 data: data
             }
         };
@@ -814,8 +815,7 @@ class Monitor {
     _extractAdditionalStatus(e, multiplexed = false) {
         const o = multiplexed ? 1 : 0;
         const v = new Uint8Array(e.target.value.buffer);
-
-        return {
+        const r = {
             elapsedTime:        (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01,
             speed:              (v[o+3] + (v[o+4] << 8)) * 0.001,
             strokeRate:         v[o+5],
@@ -825,6 +825,12 @@ class Monitor {
             restDistance:       (v[o+11] + (v[o+12] << 8)),
             restTime:           (v[o+13] + (v[o+14] << 8) + (v[o+15] << 16)) * 0.01
         };
+
+        if (multiplexed) {
+            r.averagePower = v[o+16] + (v[o+17] << 16);
+        }
+
+        return r;
     }
 
     /*
@@ -856,18 +862,30 @@ class Monitor {
     _extractAdditionalStatus2(e, multiplexed = false) {
         const o = multiplexed ? 1 : 0;
         const v = new Uint8Array(e.target.value.buffer);
+        const r = {};
 
-        return {
-            elapsedTime:            (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01,
-            intervalCount:          v[o+3],
-            averagePower:           (v[o+4] + (v[o+5] << 8)),
-            totalCalories:          (v[o+6] + (v[o+7] << 8)),
-            splitAveragePace:       (v[o+8] + (v[o+9] << 8)) * 0.01,
-            splitAveragePower:      (v[o+10] + (v[o+11] << 8)),
-            splitAverageCalories:   (v[o+12] + (v[o+13] << 8)),
-            lastSplitTime:          (v[o+14] + (v[o+15] << 8) + (v[o+16] << 16)),
-            lastSplitDistance:      (v[o+17] + (v[o+18] << 8) + (v[o+19] << 16))
+        if (multiplexed) {
+            r.elapsedTime =           (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01;
+            r.intervalCount =         v[o+3];
+            r.totalCalories =         (v[o+4] + (v[o+5] << 8));
+            r.splitAveragePace =      (v[o+6] + (v[o+7] << 8)) * 0.01;
+            r.splitAveragePower =     (v[o+8] + (v[o+9] << 8));
+            r.splitAverageCalories =  (v[o+10] + (v[o+11] << 8));
+            r.lastSplitTime =         (v[o+12] + (v[o+13] << 8) + (v[o+14] << 16));
+            r.lastSplitDistance =     (v[o+15] + (v[o+16] << 8) + (v[o+17] << 16));
+        } else {
+            r.elapsedTime =           (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01;
+            r.intervalCount =         v[o+3];
+            r.averagePower =          (v[o+4] + (v[o+5] << 8));
+            r.totalCalories =         (v[o+6] + (v[o+7] << 8));
+            r.splitAveragePace =      (v[o+8] + (v[o+9] << 8)) * 0.01;
+            r.splitAveragePower =     (v[o+10] + (v[o+11] << 8));
+            r.splitAverageCalories =  (v[o+12] + (v[o+13] << 8));
+            r.lastSplitTime =         (v[o+14] + (v[o+15] << 8) + (v[o+16] << 16));
+            r.lastSplitDistance =     (v[o+17] + (v[o+18] << 8) + (v[o+19] << 16));
         };
+
+        return r;
     }
 
     /*
@@ -900,19 +918,32 @@ class Monitor {
     _extractStrokeData(e, multiplexed = false) {
         const o = multiplexed ? 1 : 0;
         const v = new Uint8Array(e.target.value.buffer);
+        const r = {};
 
-        return {
-            elapsedTime:            (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01,
-            distance:               (v[o+3] + (v[o+4] << 8) + (v[o+5] << 16)) * 0.1,
-            driveLength:            v[o+6] * 0.01,
-            driveTime:              v[o+7] * 0.01,
-            strokeRecoveryTime:     (v[o+8] + (v[o+9] << 8)) * 0.01,
-            strokeDistance:         (v[o+10] + (v[o+11] << 8)) * 0.01,
-            peakDriveForce:         (v[o+12] + (v[o+13] << 8)) * 0.1,   /* XXX pounds */
-            averageDriveForce:      (v[o+14] + (v[o+15] << 8)) * 0.1,   /* XXX pounds */
-            workPerStroke:          (v[o+16] + (v[o+17] << 8)),
-            strokeCount:            (v[o+18] + (v[o+19] << 8))
-        };
+        if (multiplexed) {
+            r.elapsedTime =           (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01;
+            r.distance =              (v[o+3] + (v[o+4] << 8) + (v[o+5] << 16)) * 0.1;
+            r.driveLength =           v[o+6] * 0.01;
+            r.driveTime =             v[o+7] * 0.01;
+            r.strokeRecoveryTime =    (v[o+8] + (v[o+9] << 8)) * 0.01;
+            r.strokeDistance =        (v[o+10] + (v[o+11] << 8)) * 0.01;
+            r.peakDriveForce =        (v[o+12] + (v[o+13] << 8)) * 0.1;   /* XXX pounds */
+            r.averageDriveForce =     (v[o+14] + (v[o+15] << 8)) * 0.1;   /* XXX pounds */
+            r.strokeCount =           (v[o+16] + (v[o+17] << 8));
+        } else {
+            r.elapsedTime =           (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01;
+            r.distance =              (v[o+3] + (v[o+4] << 8) + (v[o+5] << 16)) * 0.1;
+            r.driveLength =           v[o+6] * 0.01;
+            r.driveTime =             v[o+7] * 0.01;
+            r.strokeRecoveryTime =    (v[o+8] + (v[o+9] << 8)) * 0.01;
+            r.strokeDistance =        (v[o+10] + (v[o+11] << 8)) * 0.01;
+            r.peakDriveForce =        (v[o+12] + (v[o+13] << 8)) * 0.1;   /* XXX pounds */
+            r.averageDriveForce =     (v[o+14] + (v[o+15] << 8)) * 0.1;   /* XXX pounds */
+            r.workPerStroke =         (v[o+16] + (v[o+17] << 8));
+            r.strokeCount =           (v[o+18] + (v[o+19] << 8));
+        }
+
+        return r;
     }
 
     /*
@@ -942,15 +973,26 @@ class Monitor {
     _extractAdditionalStrokeData(e, multiplexed = false) {
         const o = multiplexed ? 1 : 0;
         const v = new Uint8Array(e.target.value.buffer);
+        const r = {};
 
-        return {
-            elapsedTime:            (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01,
-            strokePower:            (v[o+3] + (v[o+4] << 8)),
-            strokeCalories:         (v[o+5] + (v[o+6] << 8)),
-            strokeCount:            (v[o+7] + (v[o+8] << 8)),
-            projectedWorkTime:      (v[o+9] + (v[o+10] << 8) + (v[o+11] << 16)),
-            projectedWorkDistance:  (v[o+12] + (v[o+13] << 8) + (v[o+14] << 16))
-        };
+        if (multiplexed) {
+            r.elapsedTime =           (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01;
+            r.strokePower =           (v[o+3] + (v[o+4] << 8));
+            r.strokeCalories =        (v[o+5] + (v[o+6] << 8));
+            r.strokeCount =           (v[o+7] + (v[o+8] << 8));
+            r.projectedWorkTime =     (v[o+9] + (v[o+10] << 8) + (v[o+11] << 16));
+            r.projectedWorkDistance = (v[o+12] + (v[o+13] << 8) + (v[o+14] << 16));
+            r.workPerStroke =         (v[o+15] + (v[o+16] << 8));
+        } else {
+            r.elapsedTime =           (v[o+0] + (v[o+1] << 8) + (v[o+2] << 16)) * 0.01;
+            r.strokePower =           (v[o+3] + (v[o+4] << 8));
+            r.strokeCalories =        (v[o+5] + (v[o+6] << 8));
+            r.strokeCount =           (v[o+7] + (v[o+8] << 8));
+            r.projectedWorkTime =     (v[o+9] + (v[o+10] << 8) + (v[o+11] << 16));
+            r.projectedWorkDistance = (v[o+12] + (v[o+13] << 8) + (v[o+14] << 16));
+        }
+
+        return r;
     }
 
     /*
@@ -1074,22 +1116,26 @@ class Monitor {
     _extractEndOfWorkoutSummary(e, multiplexed = false) {
         const o = multiplexed ? 1 : 0;
         const v = new Uint8Array(e.target.value.buffer);
+        const r = {};
 
-        return {
-            logEntryDate:       (v[o+0] + (v[o+1] << 8)),
-            logEntryTime:       (v[o+2] + (v[o+3] << 8)),
-            timeElapsed:        (v[o+4] + (v[o+5] << 8) + (v[o+6] << 16)) * 0.01,
-            distance:           (v[o+7] + (v[o+8] << 8) + (v[o+9] << 16)) * 0.1,
-            avgStrokeRate:      v[o+10],
-            endingHeartRate:    v[o+11],
-            averageHeartRate:   v[o+12],
-            minHeartRate:       v[o+13],
-            maxHeartRate:       v[o+14],
-            dragFactorAverage:  v[o+15],
-            recoveryHeartRate:  v[o+16],
-            workoutType:        v[o+17],
-            averagePace:        (v[o+18] + (v[o+19] << 8)) * 0.1
-        };
+        r.logEntryDate =      (v[o+0] + (v[o+1] << 8));
+        r.logEntryTime =      (v[o+2] + (v[o+3] << 8));
+        r.timeElapsed =       (v[o+4] + (v[o+5] << 8) + (v[o+6] << 16)) * 0.01;
+        r.distance =          (v[o+7] + (v[o+8] << 8) + (v[o+9] << 16)) * 0.1;
+        r.avgStrokeRate =     v[o+10];
+        r.endingHeartRate =   v[o+11];
+        r.averageHeartRate =  v[o+12];
+        r.minHeartRate =      v[o+13];
+        r.maxHeartRate =      v[o+14];
+        r.dragFactorAverage = v[o+15];
+        r.recoveryHeartRate = v[o+16];
+        r.workoutType =       v[o+17];
+
+        if (!multiplexed) {
+            r.averagePace = (v[o+18] + (v[o+19] << 8)) * 0.1;
+        }
+
+        return r;
     }
 
     /*
@@ -1151,7 +1197,7 @@ class Monitor {
                 return Promise.resolve(c);
             })
             .catch(error => {
-                console.log('getCharacteristic(' + characteristic.id + ')');
+                console.log('getCharacteristic(' + characteristic.id + ') failed: ' + error);
                 return Promise.reject(error);
             });
     }
@@ -1160,6 +1206,7 @@ class Monitor {
      */
     _setupCharacteristicValueListener(characteristic, callback) {
         const monitor = this;
+
         return this._getCharacteristic(characteristic)
             .then(c => {
                 return c.startNotifications();
@@ -1171,7 +1218,8 @@ class Monitor {
                 return Promise.resolve();
             })
             .catch(error => {
-                console.log(error);
+                console.log('_setupCharacteristicValueListener(' + characteristic.id + ') failed: ' + error);
+                return Promise.reject(error);
             });
     }
 
@@ -1179,15 +1227,20 @@ class Monitor {
      */
     _teardownCharacteristicValueListener(characteristic, callback) {
         const monitor = this;
+
         return this._getCharacteristic(characteristic)
             .then(c => {
-                return c.stopNotifications();
+                return c.stopNotifications();   /* XXX ? not working? */
             })
             .then(c => {
                 c.removeEventListener('characteristicvaluechanged', e => {
                     callback(monitor, e);
                 });
                 return Promise.resolve();
+            })
+            .catch(error => {
+                console.log('_teardownCharacteristicValueListener(' + characteristic.id + ') failed: ' + error);
+                return Promise.reject(error);
             });
     }
 
@@ -1240,7 +1293,7 @@ class Monitor {
     }
 
     _addAdditionalStatus() {
-        return this._teardownCharacteristicValueListener(
+        return this._setupCharacteristicValueListener(
                 characteristics.rowingService.additionalStatus, this._cbAdditionalStatus
         );
     }
@@ -1252,7 +1305,7 @@ class Monitor {
     }
 
     _addAdditionalStatus2() {
-        return this._teardownCharacteristicValueListener(
+        return this._setupCharacteristicValueListener(
                 characteristics.rowingService.additionalStatus, this._cbAdditionalStatus2
         );
     }
@@ -1264,7 +1317,7 @@ class Monitor {
     }
 
     _addStrokeData() {
-        return this._teardownCharacteristicValueListener(
+        return this._setupCharacteristicValueListener(
                 characteristics.rowingService.strokeData, this._cbStrokeData
         );
     }
@@ -1276,7 +1329,7 @@ class Monitor {
     }
 
     _addAdditionalStrokeData() {
-        return this._teardownCharacteristicValueListener(
+        return this._setupCharacteristicValueListener(
                 characteristics.rowingService.additionalStrokeData, this._cbAdditionalStrokeData
         );
     }
