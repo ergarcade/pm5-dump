@@ -40,6 +40,12 @@ let clearMessageTypes = function() {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
+    if (!navigator.bluetooth) {
+       toggleClass(document.querySelector('#unsupported'), 'hidden');
+       document.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+       return;
+    }
+
     let uiConnected = function() {
         document.querySelector('#connect').disabled = false;
         document.querySelector('#connect').textContent = 'Disconnect';

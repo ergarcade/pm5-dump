@@ -3,10 +3,10 @@
 <html>
 
     <head>
+        <script src="js/ymnnjq.js"></script>
         <script src="js/eventtarget.js"></script>
         <script src="js/monitor.js"></script>
         <script src="js/app.js"></script>
-        <script src="js/ymnnjq.js"></script>
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -59,7 +59,7 @@
             <button id="toggle_messages">Toggle message types</button>
 
             <div class="right">
-                <button id="toggle_instructions">Toggle instructions</button>
+                <tutton id="toggle_instructions">?</button>
                 <button id="clear">Clear dump</button>
             </div>
 
@@ -89,6 +89,11 @@
 
 
         <div id="content">
+            <div id="unsupported" class="hidden">
+                <p><strong>Your browser does not support Web Bluetooth!</strong></p>
+                <p>This application only runs on Chrome on the desktop.</p>
+            </div>
+
             <div id="instructions" class="hidden">
                 <img src="ergarcade-64x64.png" alt="pm5-dump" />
                 <h1>pm5-dump</h1>
