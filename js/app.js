@@ -10,7 +10,7 @@ let printJson = function(o) {
     p = '{ ';
     for (let k in o.data) {
         if (o.data.hasOwnProperty(k)) {
-            p += k + ':' + o.data[k] + ', ';
+            p += k + ':' + o.data[k].toFixed(2) + ', ';
         }
     }
 
