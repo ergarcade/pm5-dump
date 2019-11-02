@@ -51,6 +51,17 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#connect').textContent = 'Disconnect';
 
         document.querySelector('#toggle_messages').disabled = false;
+
+        document.querySelector('#monitorInformation').textContent = 'Getting monitor information, please wait...';
+
+        m.getMonitorInformation().
+            then(information => {
+                let mi = document.querySelector('#monitorInformation');
+                mi.textContent = information.firmwareRevision + ' | ' +
+                        information.hardwareRevision + ' | ' +
+                        information.manufacturerName + ' | ' +
+                        information.serialNumber;
+            });
     };
 
     let uiPending = function() {
@@ -64,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#connect').textContent = 'Connect';
 
         clearMessageTypes();
+        document.querySelector('#monitorInformation').textContent = '';
 
         document.querySelector('#toggle_messages').disabled = true;
         addClass(document.getElementById('messages'), 'hidden');
