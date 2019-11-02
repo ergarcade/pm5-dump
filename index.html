@@ -11,7 +11,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <style>
-        #debug {
+        #debug, #monitorInformation {
             font-size: smaller;
         }
         #debug p {
@@ -57,6 +57,7 @@
         <div id="configuration">
             <button id="connect">Connect</button>
             <button id="toggle_messages">Toggle message types</button>
+            <span id="monitorInformation"></span>
 
             <div class="right">
                 <button id="toggle_instructions">?</button>
@@ -81,7 +82,7 @@
                 <br />
 
                 <!-- XXX characteristic not listed in services? -->
-                <!-- <input type="checkbox" value="force-curve-data">&nbsp;force-curve-data -->
+                <input type="checkbox" value="force-curve-data">&nbsp;force-curve-data
 
                 <input type="checkbox" value="workout-end">&nbsp;workout-end
             </div>
